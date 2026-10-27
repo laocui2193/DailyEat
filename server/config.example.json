@@ -1,0 +1,18 @@
+{
+  "llm": {
+    "base_url": "https://api.deepseek.com",
+    "model": "deepseek-v4-pro",
+    "cheap_model": "deepseek-flash",
+    "api_key": "填入你的 DeepSeek API Key"
+  },
+  "embedding": {
+    "base_url": "https://api.siliconflow.cn",
+    "model": "BAAI/bge-m3",
+    "api_key": "填入你的硅基流动 API Key（免费额度）"
+  },
+  "vision": {
+    "model": "Qwen/Qwen3-VL-8B-Instruct"
+  },
+  "data_url": "",
+  "admin_key": "换成你自己的管理员密钥"
+}

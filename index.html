@@ -1,0 +1,2060 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>随心吃吃 — 香港大学</title>
+<style>
+:root {
+  --bg: #f5f5f5; --card-bg: #fff; --text: #333; --text2: #666;
+  --border: #e8e8e8; --accent: #e74c3c; --accent2: #f39c12;
+  --shadow: 0 2px 12px rgba(0,0,0,.08); --radius: 14px;
+}
+body.dark {
+  --bg: #1a1a2e; --card-bg: #222240; --text: #e0e0e0; --text2: #999;
+  --border: #333355; --shadow: 0 2px 16px rgba(0,0,0,.3);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;
+  background: var(--bg); color: var(--text); min-height: 100vh;
+  transition: background .3s, color .3s;
+}
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 28px; border-bottom: 1px solid var(--border);
+}
+.header h1 { font-size: 22px; font-weight: 700; }
+.header-right { display: flex; align-items: center; gap: 12px; }
+.date-badge {
+  font-size: 13px; color: var(--text2); background: var(--card-bg);
+  padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border);
+}
+.theme-btn {
+  width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--border);
+  background: var(--card-bg); cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center; transition: .2s;
+}
+.theme-btn:hover { transform: scale(1.1); }
+.container { max-width: 800px; margin: 0 auto; padding: 24px 20px; }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.card {
+  background: var(--card-bg); border-radius: var(--radius);
+  box-shadow: var(--shadow); padding: 20px; transition: transform .2s, box-shadow .2s;
+  cursor: default; display: flex; flex-direction: column; gap: 10px;
+  border: 1px solid var(--border);
+  opacity: 1; transform: translateY(0);
+  animation: cardFadeIn 0.45s ease-out backwards;
+  position: relative;  /* 让爱心按钮可以绝对定位 */
+}
+.card:nth-child(1) { animation-delay: 0.05s; }
+.card:nth-child(2) { animation-delay: 0.15s; }
+.card:nth-child(3) { animation-delay: 0.25s; }
+.card:hover { transform: translateY(-3px); box-shadow: 0 6px 24px rgba(0,0,0,.12); }
+
+/* 卡片入场动画 */
+@keyframes cardFadeIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+/* 刷新时的出场动画 */
+.card.fade-out {
+  animation: cardFadeOut 0.25s ease-in forwards;
+}
+@keyframes cardFadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-12px); }
+}
+
+/* 收藏爱心按钮 */
+.fav-btn {
+  position: absolute; top: 12px; right: 12px;
+  width: 32px; height: 32px; border-radius: 50%;
+  border: none; background: transparent; cursor: pointer;
+  font-size: 20px; line-height: 32px; text-align: center;
+  transition: transform .2s; z-index: 2; padding: 0;
+}
+.fav-btn:hover { transform: scale(1.3); }
+
+/* 收藏列表（弹窗内网格） */
+.favorites-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+}
+.fav-item {
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 14px;
+  display: flex; align-items: center; gap: 8px;
+  transition: transform .15s; font-size: 13px; cursor: pointer;
+  position: relative;
+}
+.fav-item:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.fav-remove {
+  position: absolute; top: 2px; right: 6px;
+  width: 20px; height: 20px; border-radius: 50%;
+  border: none; background: transparent; cursor: pointer;
+  font-size: 14px; color: var(--text2); line-height: 20px;
+  text-align: center; padding: 0; opacity: 0;
+  transition: opacity .15s, color .15s;
+}
+.fav-item:hover .fav-remove { opacity: 1; }
+.fav-remove:hover { color: var(--accent); }
+
+/* 优惠活动徽章 */
+.promo-tag {
+  align-self: flex-start; font-size: 11px; font-weight: 700;
+  color: #b8860b; background: #fff8dc; border: 1px solid #e6c94c;
+  padding: 3px 10px; border-radius: 10px;
+}
+body.dark .promo-tag { color: #f5d76e; background: #3e3520; border-color: #8a7a2e; }
+
+/* 预约提示标签 */
+.book-tag {
+  align-self: flex-start; font-size: 11px; font-weight: 500;
+  color: #6a1b9a; background: #f3e5f5; padding: 3px 10px; border-radius: 10px;
+}
+body.dark .book-tag { color: #e1bee7; background: #4a148c; }
+
+/* 米其林星级徽章 */
+.m-tag {
+  align-self: flex-start; display: inline-flex; align-items: center; gap: 2px;
+  font-size: 11px; font-weight: 700; color: #ed1c24;
+  border: 1.5px solid #ed1c24; border-radius: 10px;
+  padding: 1px 9px 1px 7px; line-height: 1.5;
+}
+.m-tag .m-star { width: 12px; height: 12px; fill: #ed1c24; display: block; }
+body.dark .m-tag { color: #ff6b70; border-color: #ff6b70; }
+body.dark .m-tag .m-star { fill: #ff6b70; }
+
+/* ==================== 云端功能（Level 3） ==================== */
+/* 弹窗 */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.5);
+  display: flex; align-items: center; justify-content: center; z-index: 100;
+}
+.modal {
+  background: var(--card-bg); border-radius: 14px; padding: 22px 24px;
+  width: 460px; max-width: 92vw; max-height: 80vh; overflow-y: auto;
+  box-shadow: 0 8px 40px rgba(0,0,0,.35); color: var(--text);
+}
+.modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.modal-head h3 { font-size: 17px; }
+.modal-x { cursor: pointer; font-size: 18px; color: var(--text2); padding: 2px 8px; }
+.modal-x:hover { color: var(--accent); }
+
+/* 表单 */
+.auth-input {
+  width: 100%; padding: 10px 12px; margin-bottom: 10px;
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--bg); color: var(--text); font-size: 14px; outline: none;
+}
+.auth-input:focus { border-color: var(--accent); }
+.btn-primary {
+  width: 100%; padding: 10px; border: none; border-radius: 10px;
+  background: linear-gradient(135deg, #e74c3c, #f39c12); color: #fff;
+  font-size: 15px; font-weight: 600; cursor: pointer; margin-bottom: 8px;
+}
+.auth-switch { font-size: 12px; color: var(--text2); text-align: center; cursor: pointer; }
+.auth-switch:hover { color: var(--accent); }
+.auth-msg { font-size: 12px; color: var(--accent); min-height: 16px; margin-bottom: 6px; }
+
+/* 卡片上的评分行 */
+.card-rating { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text2); cursor: pointer; }
+.card-rating .stars { color: #f5a623; letter-spacing: 1px; }
+.card-rating:hover { color: var(--accent); }
+
+/* 弹窗里的交互星星 */
+.star-input { font-size: 26px; cursor: pointer; color: #ddd; transition: transform .1s; }
+.star-input.on { color: #f5a623; }
+.star-input:hover { transform: scale(1.2); }
+
+/* 评价列表 */
+.review-item { border-top: 1px solid var(--border); padding: 10px 0; font-size: 13px; }
+.review-item .rv-head { display: flex; justify-content: space-between; color: var(--text2); font-size: 12px; }
+.review-item .rv-user { font-weight: 600; color: var(--text); }
+.review-item .rv-stars { color: #f5a623; }
+.review-item .rv-comment { margin-top: 4px; line-height: 1.5; }
+
+/* 排行榜 */
+.lb-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid var(--border); font-size: 14px; }
+.lb-rank { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: #fff; background: #ccc; flex-shrink: 0; }
+.lb-item:nth-child(1) .lb-rank { background: #f5a623; }
+.lb-item:nth-child(2) .lb-rank { background: #b8c4cc; }
+.lb-item:nth-child(3) .lb-rank { background: #cd7f32; }
+.lb-name { flex: 1; }
+.lb-score { color: #f5a623; font-weight: 700; }
+.lb-count { color: var(--text2); font-size: 12px; }
+
+/* 离线提示 */
+.offline-bar { background: #eceff1; color: #607d8b; padding: 4px 28px; font-size: 12px; text-align: center; }
+body.dark .offline-bar { background: #263238; color: #90a4ae; }
+
+/* 👤 账号下拉菜单 */
+.user-menu-wrap { position: relative; }
+.user-menu {
+  position: absolute; top: 44px; right: 0; z-index: 99;
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 12px; box-shadow: 0 6px 24px rgba(0,0,0,.18);
+  min-width: 190px; padding: 6px; font-size: 13px; color: var(--text);
+}
+.um-item { padding: 9px 12px; border-radius: 8px; cursor: pointer; white-space: nowrap; }
+.um-item:hover { background: var(--bg); }
+.um-name { padding: 9px 12px; font-weight: 700; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
+.um-logout { color: var(--accent); }
+
+/* Level 4 新增 */
+.btn-secondary {
+  width: 100%; padding: 9px; border: 1px solid var(--border); border-radius: 10px;
+  background: var(--bg); color: var(--text); font-size: 14px; cursor: pointer; margin-bottom: 8px;
+}
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+.checkin-badge { color: var(--accent2); font-size: 12px; }
+
+/* 口味画像 */
+.persona-title { text-align: center; font-size: 20px; font-weight: 700; margin: 8px 0 4px; }
+.persona-sub { text-align: center; color: var(--text2); font-size: 12px; margin-bottom: 14px; }
+.taste-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 13px; }
+.taste-bar-label { width: 86px; text-align: right; flex-shrink: 0; white-space: nowrap; overflow: hidden; }
+.taste-bar-track { flex: 1; height: 16px; background: var(--bg); border-radius: 8px; overflow: hidden; }
+.taste-bar-fill { height: 100%; background: linear-gradient(90deg, #e74c3c, #f39c12); border-radius: 8px; transition: width .4s; }
+.taste-bar-num { width: 30px; font-size: 12px; color: var(--text2); flex-shrink: 0; }
+.taste-stats { display: flex; gap: 10px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+.taste-stat { background: var(--bg); border-radius: 10px; padding: 8px 14px; font-size: 12px; text-align: center; }
+.taste-stat b { display: block; font-size: 15px; color: var(--accent); }
+
+/* AI Agent 思考过程 */
+.ai-trace { margin: 4px 0 10px; font-size: 12px; color: var(--text2); }
+.ai-trace summary { cursor: pointer; user-select: none; }
+.ai-trace summary:hover { color: var(--accent); }
+.trace-item { padding: 3px 0 3px 14px; border-left: 2px solid var(--border); margin: 4px 0; }
+
+/* AI 推荐 */
+.ai-pick { border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 10px; cursor: pointer; transition: transform .15s; }
+.ai-pick:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.ai-pick-head { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
+.ai-pick-meta { font-size: 12px; color: var(--text2); margin: 4px 0; }
+.ai-pick-reason { font-size: 13px; color: var(--accent2); line-height: 1.5; }
+.ai-loading { text-align: center; padding: 30px 0; color: var(--text2); font-size: 13px; }
+
+/* 弹窗里的餐厅卡片：去掉入场动画，静态展示 */
+.modal .card { animation: none; opacity: 1; transform: none; box-shadow: none; border: 1px solid var(--border); }
+
+/* 米其林绿星徽章（三叶草） */
+.g-tag {
+  align-self: flex-start; display: inline-flex; align-items: center; gap: 2px;
+  font-size: 11px; font-weight: 700; color: #3d8b37;
+  border: 1.5px solid #3d8b37; border-radius: 10px;
+  padding: 1px 9px 1px 7px; line-height: 1.5;
+}
+.g-tag .g-clover { width: 12px; height: 12px; display: block; }
+body.dark .g-tag { color: #6fbf6a; border-color: #6fbf6a; }
+.card-header { display: flex; align-items: center; gap: 8px; }
+.cuisine-icon { font-size: 28px; }
+.cuisine-tag {
+  font-size: 12px; padding: 2px 10px; border-radius: 12px;
+  background: #fff3e0; color: #e65100; white-space: nowrap;
+}
+body.dark .cuisine-tag { background: #3e2723; color: #ffab40; }
+.card-name { font-size: 18px; font-weight: 700; line-height: 1.3; }
+.card-meta { display: flex; gap: 14px; font-size: 13px; color: var(--text2); }
+.card-meta span { display: flex; align-items: center; gap: 4px; }
+.card-addr { font-size: 12px; color: var(--text2); line-height: 1.4; }
+.card-desc { font-size: 13px; color: var(--text2); line-height: 1.6; flex: 1; }
+.card-dishes { font-size: 12px; color: var(--accent2); }
+.card-dishes span {
+  display: inline-block; background: #fff8e1; color: #e65100;
+  padding: 2px 8px; border-radius: 10px; margin: 2px 4px 2px 0;
+}
+body.dark .card-dishes span { background: #3e2723; color: #ffab40; }
+.btn-area { text-align: center; margin: 28px 0; }
+.btn-refresh {
+  padding: 12px 40px; font-size: 16px; border: none; border-radius: 30px;
+  background: linear-gradient(135deg, #e74c3c, #f39c12); color: #fff;
+  cursor: pointer; font-weight: 600; transition: .3s;
+  box-shadow: 0 4px 16px rgba(231,76,60,.3); letter-spacing: 1px;
+}
+.btn-refresh:hover { transform: scale(1.04); box-shadow: 0 6px 24px rgba(231,76,60,.4); }
+.btn-refresh:active { transform: scale(.96); }
+.history-section { margin-top: 10px; }
+.history-title { font-size: 15px; font-weight: 600; margin-bottom: 12px; color: var(--text2); }
+.history-days { display: flex; flex-direction: column; gap: 10px; }
+.history-day { font-size: 12px; }
+.history-day .date-label { color: var(--text2); margin-bottom: 4px; font-weight: 500; }
+.history-day .names { color: var(--text); display: flex; gap: 8px; flex-wrap: wrap; }
+.history-day .names span {
+  padding: 3px 10px; background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 14px; font-size: 12px;
+}
+.empty-state { text-align: center; padding: 60px 20px; color: var(--text2); font-size: 16px; }
+
+.pref-section { margin-bottom: 18px; }
+.pref-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--text2); }
+.pref-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.pref-chip {
+  padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border);
+  background: var(--card-bg); cursor: pointer; font-size: 13px; transition: .2s;
+  user-select: none; white-space: nowrap;
+}
+.pref-chip:hover { border-color: var(--accent); color: var(--accent); }
+.pref-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.pref-sub-row { margin-top: 6px; }
+.pref-sub-chip {
+  padding: 4px 10px; border-radius: 14px; border: 1px dashed var(--border);
+  background: var(--card-bg); cursor: pointer; font-size: 12px; transition: .2s;
+  user-select: none;
+}
+.pref-sub-chip:hover { border-color: var(--accent2); color: var(--accent2); }
+.pref-sub-chip.active { background: var(--accent2); color: #fff; border-color: var(--accent2); }
+
+.countdown-timer {
+  font-size: 12px; color: var(--accent); font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  padding: 6px 12px; background: var(--card-bg);
+  border-radius: 16px; border: 1px solid var(--border);
+  white-space: nowrap; user-select: none;
+}
+
+/* 价格滑块 */
+.price-filter-section { margin-bottom: 16px; }
+.filter-label {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 13px; color: var(--text2); margin-bottom: 6px;
+}
+.filter-value { font-weight: 700; color: var(--accent); font-size: 15px; }
+.price-slider {
+  width: 100%; height: 6px;
+  -webkit-appearance: none; appearance: none;
+  background: var(--border); border-radius: 3px;
+  outline: none; cursor: pointer;
+}
+.price-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--accent); cursor: pointer;
+  box-shadow: 0 2px 6px rgba(231,76,60,.3);
+}
+.price-slider::-moz-range-thumb {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--accent); cursor: pointer; border: none;
+}
+.filter-range-labels {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--text2); margin-top: 2px;
+}
+
+/* 运营公告 */
+.notice-bar {
+  background: #fff3e0; color: #e65100;
+  padding: 8px 28px; font-size: 13px; text-align: center;
+  border-bottom: 1px solid #ffe0b2;
+  display: none;
+}
+body.dark .notice-bar { background: #3e2723; color: #ffab40; border-color: #4e342e; }
+
+/* 数据状态小标 */
+.data-status {
+  font-size: 10px; color: var(--text2); opacity: 0.7;
+  text-align: center; margin-top: 4px;
+}
+
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🍜 随心吃吃</h1>
+  <div class="header-right">
+    <div class="date-badge" id="dateBadge"></div>
+    <span class="countdown-timer" id="countdownTimer">距离明天刷新 --:--:--</span>
+    <button class="theme-btn" id="aiBtn" title="AI 对话推荐">✨</button>
+    <button class="theme-btn" id="leaderboardBtn" title="排行榜">🏆</button>
+    <div class="user-menu-wrap">
+      <button class="theme-btn" id="userBtn" title="登录/注册">👤</button>
+      <div class="user-menu" id="userMenu" style="display:none">
+        <div class="um-item" id="umLogin">👤 登录 / 注册</div>
+        <div id="umUser" style="display:none">
+          <div class="um-name" id="umName"></div>
+          <div class="um-item" id="umFavs">❤️ 我的收藏（<span id="umFavCount">0</span>）</div>
+          <div class="um-item" id="umCheckin">📍 打卡记录</div>
+          <div class="um-item" id="umProfile">🧬 口味画像</div>
+          <div class="um-item" id="umSubmit">➕ 推荐新餐厅</div>
+          <div class="um-item um-logout" id="umLogout">↩ 退出登录</div>
+        </div>
+      </div>
+    </div>
+    <button class="theme-btn" id="themeBtn" title="切换主题">🌙</button>
+  </div>
+</div>
+
+<div class="notice-bar" id="noticeBar"></div>
+<div class="offline-bar" id="offlineBar" style="display:none">🔌 服务器未连接：评分、排行榜、云同步暂不可用（本地推荐不受影响）</div>
+
+<div class="container">
+  <div class="pref-section" id="prefSection">
+      <div class="pref-title">🎯 今天想吃什么？（可选，不选则随机推荐）</div>
+      <div class="pref-row" id="prefRow"></div>
+      <div class="pref-row pref-sub-row" id="prefSubRow" style="display:none"></div>
+    </div>
+  <div class="no-book-section">
+    <div class="pref-title">🍽️ 用餐要求</div>
+    <div class="pref-row">
+      <span class="pref-chip" id="noBookChip" title="只推荐不用订位的餐厅，随到随吃">⚡ 无需预约</span>
+      <span class="pref-chip" id="promoChip" title="只推荐有优惠活动（如餐厅周）的餐厅">🎁 有优惠</span>
+    </div>
+  </div>
+  <div class="time-filter-section" id="timeFilterSection">
+    <div class="pref-title">🕐 用餐时段</div>
+    <div class="pref-row" id="timeChipRow"></div>
+  </div>
+  <div class="price-filter-section">
+    <div class="filter-label">
+      <span>💰 预算下限</span>
+      <span class="filter-value" id="priceMinDisplay">不限</span>
+    </div>
+    <input type="range" id="priceMinSlider" min="0" max="17" value="0" step="1" class="price-slider">
+    <div class="filter-label" style="margin-top:10px">
+      <span>💰 预算上限</span>
+      <span class="filter-value" id="priceMaxDisplay">不限</span>
+    </div>
+    <input type="range" id="priceMaxSlider" min="0" max="17" value="17" step="1" class="price-slider">
+    <div class="filter-range-labels">
+      <span>HK$30</span><span>HK$4000+</span>
+    </div>
+  </div>
+  <div id="cardsArea"></div>
+  <div class="btn-area">
+    <button class="btn-refresh" id="refreshBtn">🔄 换一批看看</button>
+  </div>
+  <div class="history-section" id="historyArea"></div>
+</div>
+
+<script>
+// ==================== 餐厅数据库 ====================
+// 数据已移到外部 restaurants.json，App 启动时动态加载
+// 好处：改餐厅数据只需编辑 JSON，不需要重新打包 App
+
+const DATA_URL = 'restaurants.json'  // 本地文件路径，换成 http(s):// 就是远程加载
+
+let ALL_RESTAURANTS = []        // 运行时填充
+let dataVersion = 0              // 当前数据版本号
+let dataLastUpdated = ''         // 数据最后更新日期
+let dataNotice = null            // 运营公告（如 "张想想今日歇业"）
+let dailyPicks = null            // 人工指定的每日精选 [id, id, id]
+
+async function loadRestaurantData() {
+  const CACHE_KEY = 'nearbyeats_restaurant_cache'
+
+  // 策略：按优先级尝试获取数据
+  // ① 远程拉取（如果在连网环境）→ ② localStorage 缓存 → ③ 本地文件兜底
+
+  let rawData = null
+  let source = ''
+
+  // 尝试远程拉取
+  try {
+    const resp = await fetch(DATA_URL, { cache: 'no-cache' })
+    if (resp.ok) {
+      rawData = await resp.json()
+      source = 'remote'
+    }
+  } catch (_) { /* 网络不通，跳过 */ }
+
+  // 远程没拉到，尝试本地文件（Electron file:// 环境下有效）
+  if (!rawData) {
+    try {
+      const resp = await fetch('restaurants.json')
+      if (resp.ok) {
+        rawData = await resp.json()
+        source = 'local'
+      }
+    } catch (_) { /* 本地文件也读不到 */ }
+  }
+
+  // 都拉不到，用 localStorage 缓存
+  if (!rawData) {
+    const cached = localStorage.getItem(CACHE_KEY)
+    if (cached) {
+      try {
+        rawData = JSON.parse(cached)
+        source = 'cache'
+      } catch (_) {}
+    }
+  }
+
+  // 彻底没数据
+  if (!rawData || !rawData.restaurants || rawData.restaurants.length === 0) {
+    console.error('无法加载餐厅数据！')
+    return false
+  }
+
+  // 解析数据
+  const meta = rawData._metadata || {}
+  const oldVersion = dataVersion
+
+  ALL_RESTAURANTS = rawData.restaurants
+  dataVersion = meta.version || 0
+  dataLastUpdated = meta.lastUpdated || ''
+  dataNotice = meta.notice || null
+  dailyPicks = meta.dailyPicks || null
+
+  // 如果是远程拉取的，缓存到 localStorage（下次离线可用）
+  if (source === 'remote' || source === 'local') {
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(rawData)) } catch (_) {}
+  }
+
+  // 判断是否版本更新了
+  const isNewVersion = oldVersion > 0 && dataVersion > oldVersion
+
+  console.log(`📦 数据加载完成 (来源: ${source}, 版本: ${dataVersion}, ${ALL_RESTAURANTS.length} 家餐厅)`)
+  return { isNewVersion, source }
+}
+
+// 同步获取（pickThree 等函数需要同步访问 ALL_RESTAURANTS）
+// loadRestaurantData() 必须在 render() 之前 await 完成
+
+// ==================== 工具函数 ====================
+const STORAGE_KEY = 'nearbyeats_data'
+
+function getToday() { return new Date().toISOString().slice(0,10) }
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    const data = raw ? JSON.parse(raw) : {}
+    return {
+      date: data.date || '',
+      picks: data.picks || [],
+      history: data.history || {}  // { '2026-07-22': [id,id,id], ... }
+    }
+  } catch { return { date:'', picks:[], history:{} } }
+}
+
+function saveData(d) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(d))
+}
+
+function shuffle(arr) {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
+function getDayLabel(d) {
+  const date = new Date(d)
+  const today = new Date()
+  const diff = Math.floor((today - date) / 86400000)
+  if (diff === 0) return '今天'
+  if (diff === 1) return '昨天'
+  if (diff === 2) return '前天'
+  const days = ['日','一','二','三','四','五','六']
+  return `${d.slice(5)} 周${days[date.getDay()]}`
+}
+
+// ==================== 收藏系统 ====================
+const FAV_KEY = 'nearbyeats_favorites'
+
+function loadFavorites() {
+  try {
+    const raw = localStorage.getItem(FAV_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch { return [] }
+}
+
+function saveFavorites(ids) {
+  localStorage.setItem(FAV_KEY, JSON.stringify(ids))
+}
+
+function isFavorite(id) {
+  return loadFavorites().includes(id)
+}
+
+function toggleFavorite(id, event) {
+  event.stopPropagation()
+  const favs = loadFavorites()
+  const idx = favs.indexOf(id)
+  if (idx >= 0) favs.splice(idx, 1)
+  else favs.push(id)
+  saveFavorites(favs)
+  // 已登录 → 云端同步（失败不阻塞本地操作）
+  if (currentUser && serverOnline) {
+    api('/api/favorites', { method: 'PUT', body: { ids: favs } }).then(r => {
+      if (r.ok) currentUser.favorites = r.data.favorites
+    })
+  }
+  render()
+}
+
+// 收藏列表弹窗（从 👤 菜单进入）
+function openFavoritesModal() {
+  const favs = loadFavorites()
+  if (favs.length === 0) {
+    openModal(`
+      <div class="modal-head"><h3>❤️ 我的收藏</h3><span class="modal-x" onclick="closeModal()">✕</span></div>
+      <div style="color:var(--text2);font-size:13px;padding:14px 0;text-align:center">
+        还没有收藏。看到喜欢的餐厅，点卡片右上角的 🤍 爱心即可加入。
+      </div>`)
+    return
+  }
+  openModal(`
+    <div class="modal-head">
+      <h3>❤️ 我的收藏（${favs.length}）</h3>
+      <span class="modal-x" onclick="closeModal()">✕</span>
+    </div>
+    <div class="favorites-grid">
+      ${favs.map(id => {
+        const r = ALL_RESTAURANTS.find(r => r.id === id)
+        if (!r) return ''
+        return `<div class="fav-item" onclick="openCardModal(${r.id})" title="点击查看详情">
+          <button class="fav-remove" onclick="event.stopPropagation(); toggleFavorite(${r.id}, event); openFavoritesModal()"
+                  title="取消收藏">✕</button>
+          <span style="font-size:22px">${r.icon}</span>
+          <span class="fav-item-name">${r.name}</span>
+          <span style="color:var(--text2);font-size:11px;margin-left:auto">${r.price}</span>
+        </div>`
+      }).join('')}
+    </div>
+    <div style="color:var(--text2);font-size:12px;margin-top:10px">点击收藏项查看完整卡片</div>`)
+}
+
+// 餐厅详情弹窗：复用 renderCard，但评分行换独立 id 避免和主页冲突
+function openCardModal(id) {
+  const r = ALL_RESTAURANTS.find(x => x.id === id)
+  if (!r) return
+  const cardHTML = renderCard(r).replace(`id="rating-${r.id}"`, `id="rating-m-${r.id}"`)
+  // ★ stack 模式：叠加在当前弹窗（AI 对话/收藏列表）之上，关闭后回到上一层
+  openModal(`
+    <div class="modal-head"><h3>${r.icon} ${r.name}</h3><span class="modal-x" onclick="closeModal()">✕</span></div>
+    ${cardHTML}
+  `, { stack: true })
+  // 弹窗卡片的评分行用独立 id，单独拉取回填
+  fillRatingElement(r.id, document.getElementById('rating-m-' + r.id))
+}
+
+// ==================== 推荐算法 ====================
+
+// ==================== 口味偏好 ====================
+const PREF_CATEGORIES = {
+  '中式正餐': { icon:'🍜', subs:['粤菜酒家','潮汕打冷','蛇羹炖汤','家常小炒','江浙菜','川湘菜'] },
+  '火锅煲类': { icon:'🍲', subs:['煲仔饭','特色火锅'] },
+  '烧烤烤肉': { icon:'🥩', subs:['日式烧肉','日式烧鸟','韩式烤肉','串烧'] },
+  '简餐茶餐': { icon:'🍱', subs:['港式茶餐厅','烧腊饭','粥粉面','糖水甜品','家常小炒'] },
+  '日本料理': { icon:'🍣', subs:['寿司刺身','寿喜烧','怀石料理','拉面','日式烧肉','日式自助','日式烧鸟','居酒屋'] },
+  '韩国料理': { icon:'🥘', subs:['韩国料理','韩式烤肉','韩式炸鸡'] },
+  '西餐欧陆': { icon:'🍕', subs:['意大利菜','西班牙菜','法国菜','英国菜','美式汉堡','葡国菜','咖啡烘焙','意式简餐'] },
+  '拉美风味': { icon:'🌮', subs:['墨西哥菜','南美融合'] },
+  '印度料理': { icon:'🍛', subs:['印度咖喱','南印度素食'] },
+  '早茶点心': { icon:'🥟', subs:['广式早茶'] },
+  '海鲜水产': { icon:'🦞', subs:['海鲜酒楼','潮汕打冷'] },
+  '东南亚菜': { icon:'🌴', subs:['泰国菜','越南菜','马来新加坡'] },
+  '创意融合': { icon:'🌿', subs:['中西融合','日西融合'] }
+}
+
+// ==================== 时段筛选 ====================
+const MEAL_TIMES = [
+  { key:'breakfast', label:'🌅 早餐', hours:[6,7,8,9],
+    matchTags:['早茶点心','简餐茶餐'] },
+  { key:'lunch',     label:'☀️ 午餐', hours:[10,11,12,13],
+    matchTags:['中式正餐','简餐茶餐','日本料理','韩国料理','东南亚菜','西餐欧陆','拉美风味','印度料理','海鲜水产','创意融合'] },
+  { key:'dinner',    label:'🌆 晚餐', hours:[14,15,16,17,18,19,20],
+    matchTags:null },  // null = 不过滤，所有餐厅都通过
+  { key:'supper',    label:'🌙 宵夜', hours:[21,22,23,0,1,2,3,4,5],
+    matchTags:['火锅煲类','烧烤烤肉','简餐茶餐'] }
+]
+
+let selectedMealTime = null   // 当前选中的时段 key，null = 不筛选
+let mealTimeAuto = true       // 是否自动检测的（用于虚线边框）
+
+function detectMealTime() {
+  const h = new Date().getHours()
+  const found = MEAL_TIMES.find(m => m.hours.includes(h))
+  return found ? found.key : null
+}
+
+function renderTimeChips() {
+  const row = document.getElementById('timeChipRow')
+  row.innerHTML = ''
+
+  // 「不限时段」chip
+  const allChip = document.createElement('span')
+  allChip.className = 'pref-chip' + (!selectedMealTime ? ' active' : '')
+  allChip.textContent = '🕐 不限'
+  allChip.onclick = () => { selectedMealTime = null; mealTimeAuto = false; refreshPicks() }
+  row.appendChild(allChip)
+
+  MEAL_TIMES.forEach(m => {
+    const chip = document.createElement('span')
+    const isActive = selectedMealTime === m.key
+    chip.className = 'pref-chip'
+    if (isActive) chip.classList.add('active')
+    // 自动检测的用虚线边框
+    if (isActive && mealTimeAuto) chip.style.borderStyle = 'dashed'
+    chip.textContent = m.label
+    chip.onclick = () => {
+      if (isActive && !mealTimeAuto) {
+        // 再次点击已选中的 → 取消
+        selectedMealTime = null
+      } else {
+        selectedMealTime = m.key
+        mealTimeAuto = false
+      }
+      refreshPicks()
+    }
+    row.appendChild(chip)
+  })
+}
+
+function applyTimeFilter(pool) {
+  if (!selectedMealTime) return pool  // 不限时段
+  const entry = MEAL_TIMES.find(m => m.key === selectedMealTime)
+  if (!entry || !entry.matchTags) return pool  // 晚餐不过滤
+  return pool.filter(r => r.tags.some(t => entry.matchTags.includes(t)))
+}
+
+// ==================== 价格筛选 ====================
+function parsePrice(priceStr) {
+  // 去掉所有非数字字符，'HK$120' → 120，'¥88' → 88
+  return parseInt(priceStr.replace(/[^0-9]/g, '')) || 0
+}
+
+// 对数价格刻度：滑块线性移动，价格指数增长
+// 低端密集（HK$30-600 覆盖绝大多数街坊店），高端拉开（米其林 HK$3000+）
+const PRICE_POINTS = [30, 50, 80, 120, 150, 200, 250, 300, 400, 500, 600, 800, 1000, 1500, 2000, 2500, 3000, 4000]
+
+let minBudget = PRICE_POINTS[0]  // 默认不设下限
+let maxBudget = PRICE_POINTS[PRICE_POINTS.length - 1]  // 默认不设上限
+
+function updatePriceDisplay() {
+  const minSlider = document.getElementById('priceMinSlider')
+  const maxSlider = document.getElementById('priceMaxSlider')
+  let minIdx = parseInt(minSlider.value)
+  let maxIdx = parseInt(maxSlider.value)
+
+  // 交叉钳制：下限拖过上限时，上限跟着走；反之亦然
+  if (minIdx > maxIdx) maxSlider.value = minIdx, maxIdx = minIdx
+  if (maxIdx < minIdx) minSlider.value = maxIdx, minIdx = maxIdx
+
+  minBudget = PRICE_POINTS[minIdx]
+  maxBudget = PRICE_POINTS[maxIdx]
+
+  // 显示：两端刻度视为「不限」
+  document.getElementById('priceMinDisplay').textContent =
+    minIdx === 0 ? '不限' : 'HK$' + minBudget
+  document.getElementById('priceMaxDisplay').textContent =
+    maxIdx === PRICE_POINTS.length - 1 ? '不限' : 'HK$' + maxBudget
+
+  // 两个滑块的高亮渐变
+  const pct = idx => (idx / (PRICE_POINTS.length - 1)) * 100
+  minSlider.style.background = `linear-gradient(to right, var(--accent) ${pct(minIdx)}%, var(--border) ${pct(minIdx)}%)`
+  maxSlider.style.background = `linear-gradient(to right, var(--accent) ${pct(maxIdx)}%, var(--border) ${pct(maxIdx)}%)`
+}
+
+let selectedPrefs = []
+let selectedMajor = null
+let noBookingOnly = false  // 独立开关：只看无需预约的餐厅（可与菜系筛选叠加）
+let promoOnly = false      // 独立开关：只看有优惠活动的餐厅（餐厅周等）
+
+function renderPrefChips() {
+  const row = document.getElementById('prefRow')
+  row.innerHTML = ''
+
+  // 「不限口味」按钮
+  const allChip = document.createElement('span')
+  allChip.className = 'pref-chip' + (selectedPrefs.length===0 && !selectedMajor ? ' active' : '')
+  allChip.textContent = '🎲 不限口味'
+  allChip.onclick = () => { selectedPrefs=[]; selectedMajor=null; refreshPicks() }
+  row.appendChild(allChip)
+
+  // 一级大类按钮
+  for (const [key, val] of Object.entries(PREF_CATEGORIES)) {
+    const chip = document.createElement('span')
+    chip.className = 'pref-chip' + (selectedMajor===key && selectedPrefs.length===0 ? ' active' : '')
+    chip.textContent = val.icon + ' ' + key
+    chip.onclick = () => {
+      if (selectedMajor===key) { selectedMajor=null; selectedPrefs=[] }
+      else { selectedMajor=key; selectedPrefs=[] }
+      refreshPicks()
+    }
+    row.appendChild(chip)
+  }
+
+  // 二级小类（无子类的大类如「无需预约」不显示子类行）
+  const subRow = document.getElementById('prefSubRow')
+  if (selectedMajor && PREF_CATEGORIES[selectedMajor] && PREF_CATEGORIES[selectedMajor].subs.length > 0) {
+    subRow.style.display = 'flex'
+    subRow.innerHTML = ''
+    PREF_CATEGORIES[selectedMajor].subs.forEach(sub => {
+      const subChip = document.createElement('span')
+      const isActive = selectedPrefs.some(p => p.major===selectedMajor && p.sub===sub)
+      subChip.className = 'pref-sub-chip' + (isActive ? ' active' : '')
+      subChip.textContent = sub
+      subChip.onclick = () => {
+        if (isActive) selectedPrefs = selectedPrefs.filter(p => !(p.major===selectedMajor && p.sub===sub))
+        else selectedPrefs.push({major:selectedMajor, sub})
+        refreshPicks()
+      }
+      subRow.appendChild(subChip)
+    })
+  } else { subRow.style.display = 'none' }
+}
+
+function pickThree(data) {
+  // ★ 如果远程数据指定了今日精选，直接返回
+  if (dailyPicks && dailyPicks.length === 3) {
+    const picks = dailyPicks.map(id => ALL_RESTAURANTS.find(r => r.id === id)).filter(Boolean)
+    if (picks.length === 3) return picks
+  }
+
+  const today = getToday()
+  const recentIds = new Set()
+  for (let i = 0; i < 3; i++) {
+    const d = new Date(); d.setDate(d.getDate() - i)
+    const key = d.toISOString().slice(0,10)
+    if (data.history[key]) data.history[key].forEach(id => recentIds.add(id))
+  }
+  const excludeIds = new Set([...recentIds, ...data.picks.map(r=>r.id)])
+
+  // 有口味偏好：只从匹配的餐厅里选，不够也不混入其他
+  if (selectedMajor) {
+    const hasSub = selectedPrefs.length > 0
+    let pool = ALL_RESTAURANTS.filter(r => {
+      if (r.closed) return false  // ★ 歇业餐厅排除
+      if (excludeIds.has(r.id)) return false
+      if (noBookingOnly && r.book) return false  // ★ 无需预约开关（独立于菜系）
+      if (promoOnly && (!r.promo || isPromoExpired(r.promo))) return false  // ★ 有优惠开关
+      // 多子类支持：融合餐厅（如 Ta Vie 旅）有 subs 数组，可同时属于「法国菜」和「日西融合」
+      if (hasSub) return selectedPrefs.some(p =>
+        r.tags.includes(p.major) &&
+        (r.subs ? r.subs.includes(p.sub) : r.sub === p.sub))
+      return r.tags.includes(selectedMajor)
+    })
+    // ★ 时段过滤
+    pool = applyTimeFilter(pool)
+    // ★ 价格过滤（上下限）
+    pool = pool.filter(r => {
+      const p = parsePrice(r.price)
+      return p >= minBudget && p <= maxBudget
+    })
+    if (pool.length === 0) return [] // 真没有了就空着
+
+    let selected = []
+    const shuffled = shuffle(pool)
+    const usedCuisines = new Set()
+    for (const r of shuffled) {
+      if (selected.length >= 3) break
+      if (!usedCuisines.has(r.cuisine)) { selected.push(r); usedCuisines.add(r.cuisine) }
+    }
+    for (const r of shuffled) {
+      if (selected.length >= 3) break
+      if (!selected.find(s => s.id === r.id)) selected.push(r)
+    }
+    return selected
+  }
+
+  // 无偏好：多样推荐（原逻辑）
+  let pool = ALL_RESTAURANTS.filter(r => !r.closed && !excludeIds.has(r.id))
+  if (pool.length < 3) pool = ALL_RESTAURANTS.filter(r => !r.closed && !recentIds.has(r.id))
+  if (pool.length < 3) pool = [...ALL_RESTAURANTS]
+  // ★ 时段过滤
+  pool = applyTimeFilter(pool)
+  // ★ 价格过滤（上下限）
+  pool = pool.filter(r => {
+    const p = parsePrice(r.price)
+    return p >= minBudget && p <= maxBudget
+  })
+  // ★ 无需预约开关
+  if (noBookingOnly) pool = pool.filter(r => !r.book)
+  // ★ 有优惠开关
+  if (promoOnly) pool = pool.filter(r => r.promo && !isPromoExpired(r.promo))
+
+  let selected = []
+  const shuffled = shuffle(pool)
+  const usedCuisines = new Set()
+  for (const r of shuffled) {
+    if (selected.length >= 3) break
+    if (!usedCuisines.has(r.cuisine)) { selected.push(r); usedCuisines.add(r.cuisine) }
+  }
+  for (const r of shuffled) {
+    if (selected.length >= 3) break
+    if (!selected.find(s => s.id === r.id)) selected.push(r)
+  }
+  return selected.slice(0, 3)
+}
+
+// ==================== 渲染 ====================
+
+// 优惠是否过期（validUntil 为空则视为长期有效）
+function isPromoExpired(promo) {
+  if (!promo || !promo.validUntil) return true
+  return getToday() > promo.validUntil
+}
+
+// 米其林星形：6 片圆润花瓣绕中心旋转（内联 SVG，无外部资源）
+// 官方 logo 有商标权，这里用手绘近似形
+const M_STAR_SVG = '<svg class="m-star" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+  [0,60,120,180,240,300]
+    .map(a => `<ellipse cx="50" cy="28" rx="8.5" ry="17" transform="rotate(${a} 50 50)"/>`)
+    .join('') +
+  '</svg>'
+
+// 米其林绿星：三叶草 —— 三片圆叶绕中心 120° 分布 + 茎
+const CLOVER_SVG = '<svg class="g-clover" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">' +
+  '<circle cx="50" cy="27" r="15" fill="currentColor"/>' +          // 顶叶
+  '<circle cx="30" cy="61" r="15" fill="currentColor"/>' +          // 左下叶
+  '<circle cx="70" cy="61" r="15" fill="currentColor"/>' +          // 右下叶
+  '<path d="M50 66 L50 90" stroke="currentColor" stroke-width="7" fill="none" stroke-linecap="round"/>' +
+  '</svg>'
+
+function renderCard(r) {
+  const faved = isFavorite(r.id)
+  return `
+    <div class="card">
+      <button class="fav-btn" onclick="toggleFavorite(${r.id},event)"
+              title="${faved ? '取消收藏' : '加入收藏'}">
+        ${faved ? '❤️' : '🤍'}
+      </button>
+      <div class="card-header">
+        <span class="cuisine-icon">${r.icon}</span>
+        <span class="cuisine-tag">${r.cuisine}</span>
+      </div>
+      <div class="card-name">${r.name}</div>
+      ${r.michelin ? `<span class="m-tag" title="米其林${r.michelin}星">米其林${M_STAR_SVG.repeat(r.michelin)}</span>` : ''}
+      ${r.green ? `<span class="g-tag" title="米其林绿星（可持续餐饮）">绿星${CLOVER_SVG}</span>` : ''}
+      ${r.book ? '<span class="book-tag">📅 建议提前预约</span>' : ''}
+      ${r.promo && !isPromoExpired(r.promo) ? `<span class="promo-tag" title="${r.promo.title} · ${r.promo.source}">🎁 ${r.promo.title} ${r.promo.meal}${r.promo.price > 0 ? ' HK$' + r.promo.price + '起' : ''}</span>` : ''}
+      <div class="card-rating" id="rating-${r.id}" onclick="openReviewModal(${r.id})">💬 点击查看/评分</div>
+      <div class="card-meta">
+        <span>💰 ${r.price}/人</span>
+        <span>📍 ${r.dist}</span>
+      </div>
+      <div class="card-addr">📌 ${r.addr}</div>
+      <div class="card-desc">${r.desc}</div>
+      <div class="card-dishes">
+        ${r.dishes.map(d => '<span>🔥 '+d+'</span>').join('')}
+      </div>
+    </div>
+  `
+}
+
+function render() {
+  renderPrefChips()
+  renderTimeChips()
+
+  // 运营公告
+  const noticeBar = document.getElementById('noticeBar')
+  if (dataNotice) {
+    noticeBar.textContent = '📢 ' + dataNotice
+    noticeBar.style.display = 'block'
+  } else {
+    noticeBar.style.display = 'none'
+  }
+
+  const data = loadData()
+  const today = getToday()
+
+  // 检测日期变化，自动刷新
+  if (data.date !== today) {
+    data.date = today
+    data.picks = pickThree(data)
+    data.history[today] = data.picks.map(r => r.id)
+    // 只保留近7天历史
+    const keys = Object.keys(data.history).sort().slice(-7)
+    const trimmed = {}
+    keys.forEach(k => { trimmed[k] = data.history[k] })
+    data.history = trimmed
+    data.dataVer = dataVersion
+    saveData(data)
+  }
+
+  // 渲染卡片
+  document.getElementById('cardsArea').innerHTML = data.picks.length
+    ? `<div class="cards">${data.picks.map(renderCard).join('')}</div>`
+    : `<div class="empty-state">🍽️ 点击下方按钮获取推荐</div>`
+
+  // 云端评分（异步回填，不影响渲染速度）
+  loadCardRatings()
+
+  // 日期
+  document.getElementById('dateBadge').textContent =
+    `📍 香港大学 · ${getDayLabel(today)}`
+
+  // 历史
+  const historyKeys = Object.keys(data.history).sort().reverse()
+  const historyHTML = historyKeys.length > 1 ? `
+    <div class="history-section">
+      <div class="history-title">📋 历史推荐</div>
+      <div class="history-days">
+        ${historyKeys.filter(k => k !== today).slice(0, 6).map(k => {
+          const ids = data.history[k]
+          const names = ids.map(id => {
+            const r = ALL_RESTAURANTS.find(r => r.id === id)
+            return r ? `<span>${r.icon} ${r.name}</span>` : ''
+          }).join('')
+          return `<div class="history-day">
+            <div class="date-label">${getDayLabel(k)}</div>
+            <div class="names">${names}</div>
+          </div>`
+        }).join('')}
+      </div>
+    </div>
+  ` : ''
+  document.getElementById('historyArea').innerHTML = historyHTML
+    + (dataLastUpdated ? `<div class="data-status">📦 数据更新于 ${dataLastUpdated} · v${dataVersion}</div>` : '')
+  updateAuthUI()  // 刷新菜单里的收藏计数
+}
+
+// ==================== 动画辅助 ====================
+let animating = false  // 防止连点
+
+function animateCardsOut(callback) {
+  const cards = document.querySelectorAll('.card')
+  if (cards.length === 0) { callback(); return }
+  animating = true
+  cards.forEach(c => c.classList.add('fade-out'))
+  setTimeout(() => {
+    callback()
+    animating = false
+  }, 280)  // 略长于 fadeOut 动画时长(0.25s)
+}
+
+// ==================== 事件 ====================
+
+// 核心：强制重新选 3 家并保存
+function refreshPicks() {
+  const data = loadData()
+  const today = getToday()
+  data.date = today
+  data.picks = pickThree(data)
+  data.history[today] = data.picks.map(r => r.id)
+  const keys = Object.keys(data.history).sort().slice(-7)
+  const trimmed = {}
+  keys.forEach(k => { trimmed[k] = data.history[k] })
+  data.history = trimmed
+  data.dataVer = dataVersion
+  saveData(data)
+  render()
+}
+
+document.getElementById('refreshBtn').addEventListener('click', () => {
+  if (animating) return
+  const btn = document.getElementById('refreshBtn')
+  btn.textContent = '🔄 刷新中...'
+  animateCardsOut(() => {
+    refreshPicks()
+    btn.textContent = '✅ 已刷新！'
+    setTimeout(() => { btn.textContent = '🔄 换一批看看' }, 1200)
+  })
+})
+
+// AI + 排行榜 + 账号菜单
+document.getElementById('aiBtn').addEventListener('click', openAiModal)
+document.getElementById('leaderboardBtn').addEventListener('click', openLeaderboardModal)
+
+// 👤 下拉菜单：开合 + 点击外部关闭
+const userMenu = document.getElementById('userMenu')
+document.getElementById('userBtn').addEventListener('click', e => {
+  e.stopPropagation()
+  userMenu.style.display = userMenu.style.display === 'block' ? 'none' : 'block'
+})
+document.addEventListener('click', () => { userMenu.style.display = 'none' })
+
+document.getElementById('umLogin').onclick = () => {
+  userMenu.style.display = 'none'
+  openAuthModal('login')
+}
+document.getElementById('umFavs').onclick = () => {
+  userMenu.style.display = 'none'
+  openFavoritesModal()
+}
+document.getElementById('umLogout').onclick = () => {
+  userMenu.style.display = 'none'
+  logout()
+  render()
+}
+document.getElementById('umCheckin').onclick = () => {
+  userMenu.style.display = 'none'
+  openModal(`
+    <div class="modal-head"><h3>📍 打卡记录</h3><span class="modal-x" onclick="closeModal()">✕</span></div>
+    <div class="persona-title">🔥 连续 ${checkinStats.streak} 天</div>
+    <div class="persona-sub">累计打卡 ${checkinStats.total} 次</div>
+    <div style="font-size:13px;color:var(--text2);text-align:center;line-height:1.8">
+      怎么打卡？打开任意餐厅的评分弹窗（点卡片上的「💬 点击查看/评分」），<br>
+      点「📍 打卡这家」即可。连续打卡天数每天 +1！
+    </div>`)
+}
+document.getElementById('umProfile').onclick = () => {
+  userMenu.style.display = 'none'
+  openProfileModal()
+}
+document.getElementById('umSubmit').onclick = () => {
+  userMenu.style.display = 'none'
+  if (!currentUser) { openAuthModal('login'); return }
+  openSubmitModal()
+}
+
+// 无需预约开关
+const noBookChip = document.getElementById('noBookChip')
+noBookChip.addEventListener('click', () => {
+  noBookingOnly = !noBookingOnly
+  noBookChip.classList.toggle('active', noBookingOnly)
+  refreshPicks()
+})
+
+// 有优惠开关
+const promoChip = document.getElementById('promoChip')
+promoChip.addEventListener('click', () => {
+  promoOnly = !promoOnly
+  promoChip.classList.toggle('active', promoOnly)
+  refreshPicks()
+})
+
+// 价格滑块
+const priceMinSlider = document.getElementById('priceMinSlider')
+const priceMaxSlider = document.getElementById('priceMaxSlider')
+updatePriceDisplay()  // 初始化滑块渐变
+// 两个滑块：拖拽时只更新数字，松手后才重选
+priceMinSlider.addEventListener('input', updatePriceDisplay)
+priceMaxSlider.addEventListener('input', updatePriceDisplay)
+priceMinSlider.addEventListener('change', () => refreshPicks())
+priceMaxSlider.addEventListener('change', () => refreshPicks())
+
+// 主题切换
+const themeBtn = document.getElementById('themeBtn')
+const savedTheme = localStorage.getItem('nearbyeats_theme')
+if (savedTheme === 'dark') { document.body.classList.add('dark'); themeBtn.textContent = '☀️' }
+themeBtn.addEventListener('click', () => {
+  const isDark = document.body.classList.toggle('dark')
+  themeBtn.textContent = isDark ? '☀️' : '🌙'
+  localStorage.setItem('nearbyeats_theme', isDark ? 'dark' : 'light')
+})
+
+// ==================== 倒计时器 ====================
+function updateCountdown() {
+  const now = new Date()
+  const midnight = new Date(now)
+  midnight.setHours(24, 0, 0, 0)  // 今天 24:00:00
+
+  const diff = midnight - now  // 毫秒差
+
+  if (diff <= 0) {
+    // 已经过了午夜，触发刷新
+    document.getElementById('countdownTimer').textContent = '🔄 刷新中...'
+    animateCardsOut(() => refreshPicks())
+    return
+  }
+
+  // 毫秒 → 时:分:秒
+  const h = Math.floor(diff / 3600000)
+  const m = Math.floor((diff % 3600000) / 60000)
+  const s = Math.floor((diff % 60000) / 1000)
+
+  document.getElementById('countdownTimer').textContent =
+    `距离明天刷新 ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
+}
+
+// ==================== Level 3：云端功能 ====================
+// API 基地址：本地后端。将来部署到服务器后改这一行即可
+const API_BASE = 'http://localhost:3000'
+const TOKEN_KEY = 'nearbyeats_token'
+let serverOnline = false
+let currentUser = null  // { username, favorites }
+const ratingCache = {}  // { 餐厅id: { avg, count } }
+
+// 统一请求封装：自动带 token，统一错误处理
+async function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json' }
+  const token = localStorage.getItem(TOKEN_KEY)
+  if (token) headers.Authorization = 'Bearer ' + token
+  try {
+    const resp = await fetch(API_BASE + path, {
+      method: opts.method || 'GET',
+      headers,
+      body: opts.body ? JSON.stringify(opts.body) : undefined
+    })
+    const data = await resp.json().catch(() => null)
+    return { ok: resp.ok, status: resp.status, data }
+  } catch (_) {
+    return { ok: false, status: 0, data: null, offline: true }
+  }
+}
+
+// 服务器在线检测（启动时 + 之后每分钟一次）
+async function checkServer() {
+  const r = await api('/api/health')
+  serverOnline = r.ok
+  document.getElementById('offlineBar').style.display = serverOnline ? 'none' : 'block'
+  return serverOnline
+}
+setInterval(checkServer, 60000)
+
+// ==================== 弹窗系统（支持叠加） ====================
+// opts.closeOnOutside = false 时点遮罩不关闭（AI 对话长驻，只认 ✕ 按钮）
+// opts.stack = true 时叠加在当前弹窗之上（如 AI 对话里点卡片看详情），关闭时回到上一层
+let modalStack = []
+
+function openModal(html, opts = {}) {
+  if (!opts.stack) closeModal()  // 默认替换；stack 模式叠加
+  const overlay = document.createElement('div')
+  overlay.className = 'modal-overlay'
+  overlay.id = 'modalOverlay'
+  overlay.style.zIndex = 100 + modalStack.length  // 后开的在上层
+  overlay.innerHTML = `<div class="modal">${html}</div>`
+  if (opts.closeOnOutside !== false) {
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeModal() })
+  }
+  document.body.appendChild(overlay)
+  modalStack.push(overlay)
+}
+function closeModal() {
+  // ★ 弹出栈顶：多弹窗时只关最上层，回到下一层（如关闭详情回到 AI 对话）
+  const o = modalStack.pop()
+  if (o) {
+    // ★ 焦点修复：若焦点还在弹窗里的元素上，先释放——
+    // 否则键盘事件会"寄"在已删除的 DOM 节点上，下次弹窗无法输入（切屏才恢复）
+    if (document.activeElement && o.contains(document.activeElement)) {
+      document.activeElement.blur()
+    }
+    o.remove()
+  }
+}
+
+// ==================== 登录 / 注册 ====================
+function updateAuthUI() {
+  const btn = document.getElementById('userBtn')
+  const loginItem = document.getElementById('umLogin')
+  const userBlock = document.getElementById('umUser')
+  const nameEl = document.getElementById('umName')
+  const favCount = document.getElementById('umFavCount')
+  if (currentUser) {
+    btn.title = currentUser.username + '（账号菜单）'
+    loginItem.style.display = 'none'
+    userBlock.style.display = 'block'
+    nameEl.textContent = '👤 ' + currentUser.username
+  } else {
+    btn.title = '登录/注册'
+    loginItem.style.display = 'block'
+    userBlock.style.display = 'none'
+  }
+  favCount.textContent = loadFavorites().length
+  // 打卡统计（未登录或离线时显示 0）
+  const ci = document.getElementById('umCheckin')
+  if (ci) ci.textContent = `📍 打卡记录（连续 ${checkinStats.streak} 天 · 共 ${checkinStats.total} 次）`
+}
+
+function openAuthModal(mode) {
+  // mode: 'login' 或 'register'
+  const isRegister = mode === 'register'
+  openModal(`
+    <div class="modal-head">
+      <h3>${isRegister ? '注册新账号' : '登录'}</h3>
+      <span class="modal-x" onclick="closeModal()">✕</span>
+    </div>
+    <div class="auth-msg" id="authMsg"></div>
+    <input class="auth-input" id="authUser" placeholder="用户名（2-20 字符）" maxlength="20">
+    <input class="auth-input" id="authPass" type="password" placeholder="密码（至少 6 位）">
+    <button class="btn-primary" id="authSubmit">${isRegister ? '注册并登录' : '登录'}</button>
+    <div class="auth-switch" id="authSwitch">${isRegister ? '已有账号？去登录' : '没有账号？注册一个'}</div>
+  `)
+  const submit = document.getElementById('authSubmit')
+  const doAuth = async () => {
+    const username = document.getElementById('authUser').value.trim()
+    const password = document.getElementById('authPass').value
+    const msg = document.getElementById('authMsg')
+    if (!username || !password) { msg.textContent = '请填写用户名和密码'; return }
+    const r = await api(isRegister ? '/api/register' : '/api/login', {
+      method: 'POST', body: { username, password }
+    })
+    if (!r.ok) { msg.textContent = r.data?.error || '网络错误，请确认后端已启动'; return }
+    // 登录成功：保存 token，恢复本账号数据
+    // ★ 默认丢弃访客期间的本地数据（收藏/AI 对话/推荐历史），只恢复账号自己的
+    localStorage.setItem(TOKEN_KEY, r.data.token)
+    currentUser = { username: r.data.username, favorites: r.data.favorites || [] }
+    saveFavorites(currentUser.favorites)
+    localStorage.removeItem(AI_HISTORY_KEY)
+    aiHistoryList = []
+    localStorage.removeItem(STORAGE_KEY)
+    mergeFavoritesWithCloud()
+    restoreAiHistory(currentUser.username)
+    restoreAppData(currentUser.username)
+    refreshCheckinStats()
+    updateAuthUI()
+    closeModal()
+    render()
+  }
+  submit.onclick = doAuth
+  document.getElementById('authPass').onkeydown = e => { if (e.key === 'Enter') doAuth() }
+  document.getElementById('authSwitch').onclick = () => openAuthModal(isRegister ? 'login' : 'register')
+  // ★ 焦点修复：弹窗打开即聚焦用户名输入框（顺带解决切屏才恢复的问题）
+  document.getElementById('authUser').focus()
+}
+
+function logout() {
+  // ★ 数据跟账号走：退出前把本地数据备份到专属键，然后清空——
+  // 防止下一个登录的账号看到上一个账号的收藏、AI 对话和推荐历史
+  if (currentUser && currentUser.username) {
+    const uname = currentUser.username
+    const favs = loadFavorites()
+    if (favs.length) {
+      localStorage.setItem('nearbyeats_fav_backup_' + uname, JSON.stringify(favs))
+    }
+    if (aiHistoryList.length) {
+      localStorage.setItem('nearbyeats_ai_history_backup_' + uname, JSON.stringify(aiHistoryList))
+    }
+    const appData = localStorage.getItem(STORAGE_KEY)
+    if (appData) {
+      localStorage.setItem('nearbyeats_data_backup_' + uname, appData)
+    }
+  }
+  saveFavorites([])
+  localStorage.removeItem(AI_HISTORY_KEY)
+  aiHistoryList = []
+  localStorage.removeItem(STORAGE_KEY)  // 清空推荐历史
+  localStorage.removeItem(TOKEN_KEY)
+  currentUser = null
+  updateAuthUI()
+}
+
+// 登录后恢复本账号的推荐历史（备份 ∪ 当前会话，同日期当前会话优先）
+function restoreAppData(username) {
+  const backupKey = 'nearbyeats_data_backup_' + username
+  const raw = localStorage.getItem(backupKey)
+  if (!raw) return
+  let backup = {}
+  try { backup = JSON.parse(raw) } catch (_) {}
+  const cur = loadData()
+  saveData({
+    date: cur.date || backup.date || '',
+    picks: cur.picks.length ? cur.picks : (backup.picks || []),
+    history: { ...(backup.history || {}), ...(cur.history || {}) },
+    dataVer: cur.dataVer || backup.dataVer
+  })
+  localStorage.removeItem(backupKey)
+}
+
+// 登录后恢复本账号的 AI 对话历史（自己的备份 ∪ 访客期的新对话）
+function restoreAiHistory(username) {
+  const backupKey = 'nearbyeats_ai_history_backup_' + username
+  let backup = []
+  try { backup = JSON.parse(localStorage.getItem(backupKey) || '[]') } catch (_) {}
+  const merged = [...aiHistoryList, ...backup]
+    .filter((c, i, arr) => arr.findIndex(x => x.id === c.id) === i)  // 按 id 去重
+  aiHistoryList = merged.slice(0, 20)
+  saveAiHistory()
+  localStorage.removeItem(backupKey)
+}
+
+// 登录后：云端收藏 ∪ 本账号备份 ∪ 访客期间的新收藏，合并后两边都保存
+async function mergeFavoritesWithCloud() {
+  if (!currentUser || !serverOnline) return
+  const local = loadFavorites()
+  const backupKey = 'nearbyeats_fav_backup_' + currentUser.username
+  let backup = []
+  try { backup = JSON.parse(localStorage.getItem(backupKey) || '[]') } catch (_) {}
+  const merged = [...new Set([...currentUser.favorites, ...local, ...backup])]
+  saveFavorites(merged)
+  localStorage.removeItem(backupKey)  // 备份已合并，清掉
+  await api('/api/favorites', { method: 'PUT', body: { ids: merged } })
+}
+
+// 启动时用本地 token 恢复会话
+async function tryRestoreSession() {
+  if (!localStorage.getItem(TOKEN_KEY)) return
+  const r = await api('/api/me')
+  if (r.ok) {
+    currentUser = { username: r.data.username, favorites: r.data.favorites || [] }
+    await mergeFavoritesWithCloud()
+    restoreAiHistory(currentUser.username)
+    restoreAppData(currentUser.username)
+  } else {
+    localStorage.removeItem(TOKEN_KEY)
+  }
+  updateAuthUI()
+}
+
+// ==================== 评分评论 ====================
+// 单卡片评分回填（主页卡片和弹窗卡片共用）
+async function fillRatingElement(restaurantId, el) {
+  if (!el || !serverOnline) return
+  const res = await api(`/api/reviews?restaurant_id=${restaurantId}`)
+  if (!res.ok) return
+  ratingCache[restaurantId] = { avg: res.data.avg, count: res.data.count }
+  if (res.data.avg !== null) {
+    el.innerHTML = `<span class="stars">★ ${res.data.avg}</span><span>（${res.data.count} 条评价，点击查看/评分）</span>`
+  }
+}
+
+// 拉取当前展示 3 家餐厅的评分
+async function loadCardRatings() {
+  if (!serverOnline) return
+  const data = loadData()
+  for (const r of data.picks) {
+    fillRatingElement(r.id, document.getElementById('rating-' + r.id))
+  }
+}
+
+function starsHTML(n) {
+  return '★'.repeat(n) + '☆'.repeat(5 - n)
+}
+
+let pendingRating = 0  // 弹窗里正在输入的分值
+
+async function openReviewModal(restaurantId) {
+  const r = ALL_RESTAURANTS.find(x => x.id === restaurantId)
+  if (!r) return
+  pendingRating = 0
+  const res = await api(`/api/reviews?restaurant_id=${restaurantId}`)
+  const reviews = (res.ok && res.data.reviews) || []
+  const avg = res.ok && res.data.avg !== null ? res.data.avg : null
+
+  const reviewsHTML = reviews.length ? reviews.map(rv => `
+    <div class="review-item">
+      <div class="rv-head">
+        <span class="rv-user">${rv.username}</span>
+        <span class="rv-stars">${starsHTML(rv.rating)}</span>
+      </div>
+      <div class="rv-comment">${rv.comment || '（无文字评价）'}</div>
+    </div>`).join('') : '<div style="color:var(--text2);font-size:13px;padding:10px 0">还没有人评价，来打第一个分！</div>'
+
+  const canRate = currentUser !== null
+
+  openModal(`
+    <div class="modal-head">
+      <h3>${r.icon} ${r.name} ${avg !== null ? `<span style="color:#f5a623">★ ${avg}</span>` : ''}</h3>
+      <span class="modal-x" onclick="closeModal()">✕</span>
+    </div>
+    ${canRate ? `
+      <div style="text-align:center;margin-bottom:10px">
+        <div style="font-size:13px;color:var(--text2);margin-bottom:4px">你的评分</div>
+        ${[1,2,3,4,5].map(n => `<span class="star-input${n <= pendingRating ? ' on' : ''}" onclick="setPendingRating(${n})">★</span>`).join('')}
+      </div>
+      <input class="auth-input" id="reviewComment" placeholder="写点什么（可选，最多200字）" maxlength="200">
+      <button class="btn-primary" onclick="submitReview(${restaurantId})">提交评分</button>
+      <button class="btn-secondary" onclick="doCheckin(${restaurantId})">📍 打卡这家（连续 ${checkinStats.streak} 天）</button>
+      <div class="auth-msg" id="reviewMsg"></div>
+    ` : `<div class="auth-switch" style="margin-bottom:10px" onclick="closeModal();openAuthModal('login')">登录后即可评分 / 打卡 →</div>`}
+    ${reviewsHTML}
+  `, { stack: true })  // ★ 叠加在详情/AI 对话之上
+}
+
+function setPendingRating(n) {
+  pendingRating = n
+  document.querySelectorAll('.star-input').forEach((el, i) => {
+    el.classList.toggle('on', i < n)
+  })
+}
+
+async function submitReview(restaurantId) {
+  const comment = (document.getElementById('reviewComment')?.value || '').trim()
+  const msg = document.getElementById('reviewMsg')
+  if (!pendingRating) { msg.textContent = '请先点星星打分'; return }
+  const r = await api('/api/reviews', {
+    method: 'POST',
+    body: { restaurantId, rating: pendingRating, comment }
+  })
+  if (!r.ok) { msg.textContent = r.data?.error || '提交失败'; return }
+  closeModal()
+  loadCardRatings()  // 刷新卡片上的分数
+  openReviewModal(restaurantId)  // 重新打开，看到自己的评价
+}
+
+// ==================== 排行榜 ====================
+async function openLeaderboardModal() {
+  if (!serverOnline) { alert('后端未连接，请先启动 server（node server/server.js）'); return }
+  openModal(`
+    <div class="modal-head"><h3>🏆 食客排行榜 TOP10</h3><span class="modal-x" onclick="closeModal()">✕</span></div>
+    <div style="color:var(--text2);font-size:13px;text-align:center">加载中...</div>
+  `)
+  const res = await api('/api/leaderboard')
+  const list = (res.ok && res.data.leaderboard) || []
+  const items = list.map((item, i) => {
+    const r = ALL_RESTAURANTS.find(x => x.id === item.restaurantId)
+    if (!r) return ''
+    return `<div class="lb-item">
+      <span class="lb-rank">${i + 1}</span>
+      <span>${r.icon}</span>
+      <span class="lb-name">${r.name}</span>
+      <span class="lb-score">★ ${item.avg}</span>
+      <span class="lb-count">${item.count} 条</span>
+    </div>`
+  }).join('') || '<div style="color:var(--text2);font-size:13px;padding:10px 0">还没有足够的评分（每店需 ≥2 条）</div>'
+  document.querySelector('.modal').innerHTML = `
+    <div class="modal-head"><h3>🏆 食客排行榜 TOP10</h3><span class="modal-x" onclick="closeModal()">✕</span></div>
+    ${items}
+  `
+}
+
+// ==================== Level 4：UGC 用户餐厅 ====================
+// 启动时拉取已审核的 UGC 餐厅，并入推荐池（id 从 10000 起，避免冲突）
+async function loadUGC() {
+  if (!serverOnline) return
+  const r = await api('/api/submissions/approved')
+  if (!r.ok) return
+  const before = ALL_RESTAURANTS.length
+  for (const s of r.data.submissions) {
+    // 避免重复合并
+    if (ALL_RESTAURANTS.some(x => x.ugc && x.srcId === s.id)) continue
+    ALL_RESTAURANTS.push({
+      id: 10000 + s.id, srcId: s.id,
+      name: s.name, cuisine: s.cuisine, icon: '🆕',
+      price: s.price, dist: s.dist,
+      tags: s.tag ? [s.tag] : [], sub: 'UGC 用户推荐',
+      addr: s.addr, desc: s.desc, dishes: s.dishes || [],
+      ugc: true, book: false, closed: false
+    })
+  }
+  if (ALL_RESTAURANTS.length > before) refreshPicks()  // 池子变了，重抽一批
+}
+
+function openSubmitModal() {
+  const majors = Object.keys(PREF_CATEGORIES)
+  openModal(`
+    <div class="modal-head"><h3>➕ 推荐新餐厅</h3><span class="modal-x" onclick="closeModal()">✕</span></div>
+    <div class="auth-msg" id="subMsg"></div>
+    <input class="auth-input" id="subName" placeholder="店名（必填）">
+    <input class="auth-input" id="subCuisine" placeholder="菜系，如：川菜 / 寿司（必填）">
+    <select class="auth-input" id="subTag">
+      <option value="">所属大类（可选，用于筛选）</option>
+      ${majors.map(m => `<option value="${m}">${m}</option>`).join('')}
+    </select>
+    <input class="auth-input" id="subPrice" placeholder="人均，如：HK$100（必填）">
+    <input class="auth-input" id="subDist" placeholder="距离，如：500m">
+    <input class="auth-input" id="subAddr" placeholder="地址（必填）">
+    <input class="auth-input" id="subDesc" placeholder="一句话简介（最多300字）" maxlength="300">
+    <input class="auth-input" id="subDishes" placeholder="推荐菜，用逗号分隔，最多5个">
+    <button class="btn-primary" onclick="submitUGC()">提交审核</button>
+  `)
+}
+
+async function submitUGC() {
+  const msg = document.getElementById('subMsg')
+  const get = id => (document.getElementById(id)?.value || '').trim()
+  const dishes = get('subDishes').split(/[,，]/).map(s => s.trim()).filter(Boolean)
+  const r = await api('/api/submissions', {
+    method: 'POST',
+    body: {
+      name: get('subName'), cuisine: get('subCuisine'), tag: get('subTag'),
+      price: get('subPrice'), dist: get('subDist'), addr: get('subAddr'),
+      desc: get('subDesc'), dishes
+    }
+  })
+  if (!r.ok) { msg.textContent = r.data?.error || '提交失败（需登录）'; return }
+  msg.textContent = '✅ ' + r.data.message
+  setTimeout(closeModal, 1500)
+}
+
+// ==================== Level 4：打卡签到 ====================
+let checkinStats = { streak: 0, total: 0 }
+
+async function refreshCheckinStats() {
+  if (!currentUser || !serverOnline) { checkinStats = { streak: 0, total: 0 }; return }
+  const r = await api('/api/checkins/mine')
+  if (r.ok) checkinStats = { streak: r.data.streak, total: r.data.total }
+  updateAuthUI()
+}
+
+async function doCheckin(restaurantId) {
+  const r = await api('/api/checkins', { method: 'POST', body: { restaurantId } })
+  const msg = document.getElementById('reviewMsg')
+  if (!r.ok) { msg.textContent = r.data?.error || '打卡失败（需登录）'; return }
+  await refreshCheckinStats()
+  msg.textContent = `📍 打卡成功！连续 ${r.data.streak} 天，累计 ${r.data.total} 次`
+}
+
+// ==================== Level 4：口味画像 ====================
+const PERSONA = {
+  '火锅煲类': '🔥 火锅冒险家', '日本料理': '🍣 日料鉴赏家', '简餐茶餐': '🍜 街坊美食家',
+  '西餐欧陆': '🍷 西餐爱好者', '早茶点心': '🥟 点心早茶控', '烧烤烤肉': '🥩 烧肉猎手',
+  '韩国料理': '🥘 韩料铁粉', '东南亚菜': '🌴 南洋风味控', '海鲜水产': '🦞 海鲜爱好者',
+  '中式正餐': '🥢 中式正餐老饕', '印度料理': '🍛 咖喱探险家', '拉美风味': '🌮 拉美风味控',
+  '创意融合': '🌿 创意料理鉴赏家'
+}
+
+async function computeTasteProfile() {
+  const likes = {}   // 大类 → 得分
+  const addTags = (map, tags, w) => tags.forEach(t => { map[t] = (map[t] || 0) + w })
+
+  // 信号源 ①：收藏（权重 2）
+  for (const id of loadFavorites()) {
+    const r = ALL_RESTAURANTS.find(x => x.id === id)
+    if (r) addTags(likes, r.tags, 2)
+  }
+  // 信号源 ②：推荐历史（权重 1）
+  const data = loadData()
+  for (const key of Object.keys(data.history || {})) {
+    for (const id of data.history[key]) {
+      const r = ALL_RESTAURANTS.find(x => x.id === id)
+      if (r) addTags(likes, r.tags, 1)
+    }
+  }
+  // 信号源 ③：高分评价（权重 3，需登录）
+  let reviewCount = 0, avgMyRating = null, likedPrices = []
+  if (currentUser && serverOnline) {
+    const res = await api('/api/reviews/mine')
+    if (res.ok) {
+      reviewCount = res.data.reviews.length
+      avgMyRating = reviewCount
+        ? (res.data.reviews.reduce((s, x) => s + x.rating, 0) / reviewCount).toFixed(1)
+        : null
+      for (const rv of res.data.reviews) {
+        const r = ALL_RESTAURANTS.find(x => x.id === rv.restaurantId)
+        if (!r) continue
+        if (rv.rating >= 4) addTags(likes, r.tags, 3)
+        likedPrices.push(parsePrice(r.price))
+      }
+    }
+  }
+  return { likes, reviewCount, avgMyRating, likedPrices }
+}
+
+async function openProfileModal() {
+  openModal(`<div class="modal-head"><h3>🧬 口味画像</h3><span class="modal-x" onclick="closeModal()">✕</span></div>
+    <div class="ai-loading">分析中...</div>`)
+  const p = await computeTasteProfile()
+  // ★ 蒸馏记忆：AI 从对话中记住的长期偏好
+  let aiPrefs = []
+  if (currentUser && serverOnline) {
+    const pr = await api('/api/preferences/mine')
+    if (pr.ok) aiPrefs = pr.data.preferences || []
+  }
+  const top = Object.entries(p.likes).sort((a, b) => b[1] - a[1]).slice(0, 5)
+  const topMajor = top.length ? top[0][0] : null
+  const persona = topMajor ? (PERSONA[topMajor] || '🍽️ 探索型食客') : '🍽️ 探索型食客'
+  const maxScore = top.length ? top[0][1] : 1
+  const avgPrice = p.likedPrices.length
+    ? Math.round(p.likedPrices.reduce((s, x) => s + x, 0) / p.likedPrices.length)
+    : null
+
+  document.querySelector('.modal').innerHTML = `
+    <div class="modal-head"><h3>🧬 口味画像</h3><span class="modal-x" onclick="closeModal()">✕</span></div>
+    <div class="persona-title">${persona}</div>
+    <div class="persona-sub">根据你的收藏、推荐历史和评分分析生成${currentUser ? '（已登录，数据更准）' : '（登录并评分后画像更准）'}</div>
+    ${top.length ? top.map(([t, s]) => `
+      <div class="taste-bar-row">
+        <span class="taste-bar-label">${t}</span>
+        <div class="taste-bar-track"><div class="taste-bar-fill" style="width:${Math.round(s / maxScore * 100)}%"></div></div>
+        <span class="taste-bar-num">${s}</span>
+      </div>`).join('')
+      : '<div style="color:var(--text2);font-size:13px;text-align:center;padding:14px 0">还没有足够的数据，先去收藏和评分吧！</div>'}
+    <div class="taste-stats">
+      <div class="taste-stat"><b>${p.reviewCount}</b>条评分</div>
+      ${p.avgMyRating !== null ? `<div class="taste-stat"><b>★ ${p.avgMyRating}</b>我的平均分</div>` : ''}
+      ${avgPrice !== null ? `<div class="taste-stat"><b>HK$${avgPrice}</b>偏好人均</div>` : ''}
+      <div class="taste-stat"><b>${loadFavorites().length}</b>家收藏</div>
+    </div>
+    ${aiPrefs.length ? `
+    <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:12px">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:8px">🤖 AI 从对话中记住的偏好</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${aiPrefs.map(x => `<span style="font-size:12px;padding:3px 10px;border-radius:12px;background:var(--bg);border:1px solid var(--border)">${x.category}：${x.content}</span>`).join('')}
+      </div>
+    </div>` : ''}`
+}
+
+// ==================== Level 4：AI 对话推荐（多轮） ====================
+let aiChat = { messages: [] }  // 当前对话 [{role, content}]，附带展示用的 text/recs
+let pendingImage = null       // 待发送的图片（base64），发送后清空
+
+// 压缩图片到 512px JPEG，返回纯 base64（去 data: 前缀）
+function resizeImage(file, maxSize = 512) {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      const scale = Math.min(1, maxSize / Math.max(img.width, img.height))
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.round(img.width * scale)
+      canvas.height = Math.round(img.height * scale)
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height)
+      URL.revokeObjectURL(url)
+      resolve(canvas.toDataURL('image/jpeg', 0.8).split(',')[1])
+    }
+    img.onerror = reject
+    img.src = url
+  })
+}
+
+// "正在思考..." 的圆点循环动画（. → .. → ... → .... ）
+let dotsStep = 0
+setInterval(() => {
+  const el = document.getElementById('aiDots')
+  if (!el || el.closest('#aiThinking')?.style.display === 'none') return
+  el.textContent = '.'.repeat(dotsStep % 4)
+  dotsStep++
+}, 350)
+
+function setThinking(on) {
+  const el = document.getElementById('aiThinking')
+  if (el) el.style.display = on ? 'block' : 'none'
+}
+
+function pickImage() {
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = 'image/*'
+  input.onchange = async () => {
+    const f = input.files && input.files[0]
+    if (!f) return
+    try {
+      pendingImage = await resizeImage(f)
+      renderImageChip()
+    } catch (_) { /* 读取失败忽略 */ }
+  }
+  input.click()
+}
+
+function renderImageChip() {
+  const chip = document.getElementById('imgChip')
+  if (!chip) return
+  if (pendingImage) {
+    chip.style.display = 'inline-flex'
+    chip.innerHTML = `<img src="data:image/jpeg;base64,${pendingImage}" style="width:32px;height:32px;object-fit:cover;border-radius:6px"><span style="font-size:12px">已选图（点击取消）</span>`
+    chip.onclick = () => { pendingImage = null; renderImageChip() }
+  } else {
+    chip.style.display = 'none'
+  }
+}
+
+// 对话历史（localStorage，最多保留 20 段，每段最多 20 条消息）
+const AI_HISTORY_KEY = 'nearbyeats_ai_history'
+let aiHistoryList = []
+try { aiHistoryList = JSON.parse(localStorage.getItem(AI_HISTORY_KEY) || '[]') } catch (_) {}
+
+function saveAiHistory() {
+  try { localStorage.setItem(AI_HISTORY_KEY, JSON.stringify(aiHistoryList)) } catch (_) {}
+}
+
+// 每次 AI 回复完成后调用：把当前对话快照存进历史（同 id 覆盖 = 续写）
+function persistAiChat() {
+  if (!aiChat.id || aiChat.messages.length === 0) return
+  const snapshot = {
+    id: aiChat.id, startedAt: aiChat.startedAt, firstQuery: aiChat.firstQuery,
+    // 图片 base64 不持久化（体积大），历史里只存文字
+    messages: aiChat.messages.slice(-20).map(({ image, ...rest }) => rest)
+  }
+  const idx = aiHistoryList.findIndex(c => c.id === aiChat.id)
+  if (idx >= 0) aiHistoryList[idx] = snapshot
+  else aiHistoryList.unshift(snapshot)  // 最新在前
+  aiHistoryList = aiHistoryList.slice(0, 20)
+  saveAiHistory()
+}
+
+function aiBubble(role, text) {
+  const isUser = role === 'user'
+  return `<div style="margin:8px 0;display:flex;justify-content:${isUser ? 'flex-end' : 'flex-start'}">
+    <div style="max-width:82%;padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.5;
+      background:${isUser ? 'var(--accent)' : 'var(--bg)'};color:${isUser ? '#fff' : 'var(--text)'};
+      white-space:pre-wrap;word-break:break-word">${text}</div>
+  </div>`
+}
+
+// 去掉回答末尾的 JSON 数组块（推荐卡片已单独渲染，避免气泡里出现原始 JSON）
+function cleanAiReply(text) {
+  const i = text.lastIndexOf('[')
+  if (i > 0 && text.slice(i).trimEnd().endsWith(']')) return text.slice(0, i).trimEnd()
+  return text
+}
+
+function aiPickHTML(rec) {
+  return `<div class="ai-pick" onclick="openCardModal(${rec.id})" title="点击查看完整卡片">
+    <div class="ai-pick-head">${rec.icon} ${rec.name}</div>
+    <div class="ai-pick-meta">${rec.cuisine} · ${rec.price}/人 · 📍 ${rec.dist}</div>
+    <div class="ai-pick-reason">💡 ${rec.reason || ''}</div>
+  </div>`
+}
+
+function renderAiChat() {
+  const box = document.getElementById('aiChatBox')
+  if (!box) return
+  let html = ''
+  for (const m of aiChat.messages) {
+    if (m.role === 'user') {
+      html += aiBubble('user', m.content)
+      if (m.image) {
+        html += `<div style="margin:2px 0 8px;display:flex;justify-content:flex-end">
+          <img src="data:image/jpeg;base64,${m.image}" style="max-width:160px;max-height:160px;border-radius:10px;border:1px solid var(--border)">
+        </div>`
+      }
+    } else {
+      // ★ 写操作确认块（流式期间也可能出现，单独复用）
+      const pendingBlock = m.pending ? `
+        <div style="margin:6px 0;padding:10px;border:1.5px dashed var(--accent);border-radius:10px;font-size:13px">
+          <div style="margin-bottom:8px">🔐 AI 请求执行：${m.pending.action.name === 'add_favorite' ? '把' : '为'}「${m.pending.action.restaurant_name}」${m.pending.action.name === 'add_favorite' ? '加入收藏' : '打卡'}</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-primary" style="width:auto;padding:6px 18px;margin:0" onclick="confirmAgent(aiChat.messages[${aiChat.messages.indexOf(m)}], true)">✅ 确认</button>
+            <button class="btn-secondary" style="width:auto;padding:6px 18px;margin:0" onclick="confirmAgent(aiChat.messages[${aiChat.messages.indexOf(m)}], false)">❌ 取消</button>
+          </div>
+        </div>` : ''
+      if (m.streaming) {
+        // ★ 流式期间：不渲染任何气泡（占位动画由 #aiThinking 独立元素负责）
+        html += pendingBlock
+      } else {
+        // ★ 完成后：只渲染推荐卡片，正文全部隐藏
+        if (m.recs && m.recs.length) html += m.recs.map(aiPickHTML).join('')
+        html += pendingBlock
+        if (m.confirmed === true) html += `<div class="trace-item" style="color:var(--accent2)">✅ 已确认执行</div>`
+        if (m.confirmed === false) html += `<div class="trace-item">❌ 已取消</div>`
+      }
+    }
+  }
+  box.innerHTML = html || `
+    <div style="color:var(--text2);font-size:13px;text-align:center;padding:16px 0;line-height:1.8">
+      用自然语言描述，AI 从 ${ALL_RESTAURANTS.length} 家餐厅里挑 3 家<br>
+      <span style="font-size:12px">例：想吃火锅，不要太辣，人均 300 以内<br>之后可以继续提要求：更辣一点 / 换成便宜的 / 不想吃寿司</span>
+    </div>`
+  box.scrollTop = box.scrollHeight
+}
+
+async function openAiModal() {
+  if (!serverOnline) { alert('后端未连接，请先启动 启动后端.bat'); return }
+  aiChat = { messages: [] }  // 每次打开开始新对话
+  openModal(`
+    <div class="modal-head">
+      <h3>✨ AI 对话推荐</h3>
+      <div style="display:flex;gap:10px;align-items:center">
+        <span style="cursor:pointer;font-size:13px;color:var(--text2)" onclick="showAiHistory()" title="查看历史对话">📜 历史</span>
+        <span class="modal-x" onclick="closeModal()">✕</span>
+      </div>
+    </div>
+    <div id="aiChatBox" style="max-height:48vh;overflow-y:auto;margin-bottom:10px"></div>
+    <div id="aiThinking" style="display:none;font-size:13px;color:var(--text2);margin-bottom:8px">🤖 正在思考<span id="aiDots"></span></div>
+    <div id="imgChip" style="display:none;align-items:center;gap:6px;margin-bottom:8px;padding:4px 8px;border:1px dashed var(--border);border-radius:8px;cursor:pointer;width:fit-content"></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn-secondary" style="width:auto;padding:10px 12px;margin-bottom:0;flex-shrink:0" onclick="pickImage()" title="上传食物图片，AI 看图推荐">📷</button>
+      <input class="auth-input" id="aiQuery" placeholder="说说你想吃什么？也可以上传食物照片" style="margin-bottom:0">
+      <button class="btn-primary" style="width:auto;padding:10px 18px;margin-bottom:0;flex-shrink:0" onclick="askAi()">发送</button>
+    </div>
+  `, { closeOnOutside: false })  // ★ 点外面不关闭，只有 ✕ 能关
+  setThinking(false)  // ★ 打开弹窗即确保思考提示隐藏（只有真正提问时才显示）
+  renderAiChat()
+  renderImageChip()
+  document.getElementById('aiQuery').onkeydown = e => { if (e.key === 'Enter') askAi() }
+}
+
+// 共享的 SSE 流解析器：把后端事件流应用到某条 assistant 消息上
+async function readAgentStream(amsg, resp) {
+  const box = document.getElementById('aiChatBox')
+  const reader = resp.body.getReader()
+  const decoder = new TextDecoder()
+  let buf = ''
+  try {
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      buf += decoder.decode(value, { stream: true })
+      let idx
+      while ((idx = buf.indexOf('\n\n')) >= 0) {
+        const frame = buf.slice(0, idx)
+        buf = buf.slice(idx + 2)
+        for (const line of frame.split('\n')) {
+          if (!line.startsWith('data: ')) continue
+          let ev
+          try { ev = JSON.parse(line.slice(6)) } catch (_) { continue }
+          if (ev.type === 'trace') {
+            amsg.trace.push({ tool: ev.tool, summary: ev.summary })
+          } else if (ev.type === 'delta') {
+            amsg.content += ev.text
+          } else if (ev.type === 'done') {
+            amsg.recs = ev.recommendations || []
+            setThinking(false)  // ★ 卡片一到就隐藏思考提示（后台评审与卡片无关）
+          } else if (ev.type === 'review_update') {
+            // ★ 后台核查后的修正：静默更新卡片
+            amsg.recs = ev.recommendations || amsg.recs
+          } else if (ev.type === 'error') {
+            amsg.text = '⚠️ ' + ev.text
+          } else if (ev.type === 'pending_action') {
+            // ★ 写操作暂停：等待用户确认
+            amsg.pending = { session_id: ev.session_id, action: ev.action, summary: ev.summary }
+          }
+        }
+        renderAiChat()
+        if (box) box.scrollTop = box.scrollHeight
+      }
+    }
+  } catch (_) { /* 流中断 */ }
+}
+
+function aiFetch(path, body) {
+  const headers = { 'Content-Type': 'application/json' }
+  const token = localStorage.getItem(TOKEN_KEY)
+  if (token) headers.Authorization = 'Bearer ' + token
+  return fetch(API_BASE + path, { method: 'POST', headers, body: JSON.stringify(body) })
+}
+
+// 用户点击确认/取消：恢复服务端 Agent 循环（继续流式）
+async function confirmAgent(amsg, approved) {
+  const pend = amsg.pending
+  amsg.pending = null
+  amsg.confirmed = approved
+  setThinking(true)  // ★ 确认后恢复执行，重新显示思考动画
+  renderAiChat()
+  let resp
+  try {
+    resp = await aiFetch('/api/agent/confirm', { session_id: pend.session_id, approved })
+  } catch (_) {
+    amsg.text = '⚠️ 网络错误'
+    setThinking(false)
+    return
+  }
+  if (!resp.ok) {
+    amsg.text = '⚠️ 会话已过期，请重新提问'
+    setThinking(false)
+    persistAiChat()
+    renderAiChat()
+    return
+  }
+  await readAgentStream(amsg, resp)
+  delete amsg.streaming
+  setThinking(false)  // ★ 隐藏思考动画
+  if (!amsg.text) {
+    amsg.text = cleanAiReply(amsg.content) || ''
+  }
+  persistAiChat()
+  renderAiChat()
+}
+
+async function askAi() {
+  const input = document.getElementById('aiQuery')
+  const q = (input?.value || '').trim()
+  if (!q) return
+  // 第一条消息时给对话建立身份（用于历史持久化）
+  if (!aiChat.id) {
+    aiChat.id = Date.now()
+    aiChat.startedAt = new Date().toISOString()
+    aiChat.firstQuery = q
+  }
+  const img = pendingImage  // 本次消息附带的图片
+  aiChat.messages.push({ role: 'user', content: q, image: img })  // image 仅会话内展示，不持久化
+  pendingImage = null
+  input.value = ''
+  setThinking(true)  // ★ 显示"正在思考"动画
+  renderAiChat()
+  renderImageChip()
+
+  // 流式占位消息：思考过程 + 逐字内容都实时更新
+  const amsg = { role: 'assistant', content: '', text: '', recs: [], trace: [], streaming: true }
+  aiChat.messages.push(amsg)
+  renderAiChat()
+  const box = document.getElementById('aiChatBox')
+  box.scrollTop = box.scrollHeight
+
+  let resp
+  try {
+    // 消息历史剥离 image 字段（只发纯文本），图片单独走 image 参数
+    const cleanMsgs = aiChat.messages.filter(m => !m.streaming)
+      .map(({ image, ...rest }) => rest)
+    resp = await aiFetch('/api/agent/stream', { messages: cleanMsgs, image: img || undefined })
+  } catch (_) {
+    amsg.text = '⚠️ 网络错误，请确认后端已启动'
+    delete amsg.streaming
+    setThinking(false)
+    renderAiChat()
+    return
+  }
+  if (!resp.ok) {
+    let err = 'AI 调用失败'
+    try { err = (await resp.json()).error || err } catch (_) {}
+    amsg.text = '⚠️ ' + err
+    delete amsg.streaming
+    setThinking(false)
+    persistAiChat()
+    renderAiChat()
+    return
+  }
+
+  await readAgentStream(amsg, resp)
+  delete amsg.streaming
+  if (!amsg.text) {
+    // 显示干净的正文回复（剥离 JSON 尾巴），卡片在其下方单独展示
+    amsg.text = cleanAiReply(amsg.content) || (amsg.recs.length ? `为你推荐 ${amsg.recs.length} 家：` : '')
+  }
+  persistAiChat()  // ★ 完成写入历史
+  renderAiChat()
+}
+
+// ==================== AI 对话历史 ====================
+function showAiHistory() {
+  const box = document.getElementById('aiChatBox')
+  if (!box) return
+  box.innerHTML = `
+    <div style="font-size:12px;color:var(--text2);cursor:pointer;margin-bottom:10px" onclick="renderAiChat()">↩ 返回对话</div>
+    ${aiHistoryList.length ? aiHistoryList.map(c => `
+      <div class="ai-pick" style="cursor:default">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+          <b style="font-size:13px">${c.firstQuery || '（无标题对话）'}</b>
+          <span style="font-size:11px;color:var(--text2);flex-shrink:0">${(c.startedAt || '').slice(0, 16).replace('T', ' ')}</span>
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin:4px 0">${c.messages.length} 条消息 · ${c.messages.filter(m => m.recs && m.recs.length).length} 轮推荐</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-secondary" style="width:auto;padding:4px 14px;margin-bottom:0" onclick="loadAiChat(${c.id})">载入</button>
+          <button class="btn-secondary" style="width:auto;padding:4px 14px;margin-bottom:0" onclick="deleteAiChat(${c.id})">删除</button>
+        </div>
+      </div>`).join('')
+      : '<div style="color:var(--text2);font-size:13px;text-align:center;padding:24px 0">还没有历史对话。去问 AI 一次吧！</div>'}
+  `
+}
+
+function loadAiChat(id) {
+  const c = aiHistoryList.find(x => x.id === id)
+  if (!c) return
+  aiChat = { id: c.id, startedAt: c.startedAt, firstQuery: c.firstQuery, messages: c.messages }
+  renderAiChat()  // 载入后可以继续追问，追问结果会续写回这条历史
+}
+
+function deleteAiChat(id) {
+  aiHistoryList = aiHistoryList.filter(x => x.id !== id)
+  saveAiHistory()
+  showAiHistory()
+}
+
+// ==================== 启动流程 ====================
+// 数据加载是异步的，用 IIFE (立即执行异步函数) 包裹
+;(async function init() {
+  // 显示加载状态
+  document.getElementById('cardsArea').innerHTML =
+    '<div class="empty-state">📡 正在加载餐厅数据...</div>'
+
+  // 等数据加载完成
+  const result = await loadRestaurantData()
+  if (!result) {
+    document.getElementById('cardsArea').innerHTML =
+      '<div class="empty-state">❌ 数据加载失败，请检查网络后重启 App</div>'
+    return
+  }
+
+  // ★ 数据迁移：本地记录的数据版本和当前数据不一致（如深圳→香港），
+  // 旧推荐历史和收藏的 ID 已经没意义，全部清空
+  const saved = loadData()
+  if (saved.dataVer !== dataVersion) {
+    saved.date = ''
+    saved.picks = []
+    saved.history = {}
+    saved.dataVer = dataVersion
+    saveData(saved)
+    localStorage.removeItem(FAV_KEY)  // 收藏也一起清
+  }
+
+  // 数据加载成功后，正常启动
+  selectedMealTime = detectMealTime()
+  render()
+  updateCountdown()
+  updateAuthUI()
+
+  // 云端：检测服务器 + 恢复登录会话 + UGC 合并（异步，不阻塞界面）
+  checkServer().then(ok => {
+    if (ok) {
+      tryRestoreSession()
+        .then(() => refreshCheckinStats())
+        .then(() => loadUGC())
+        .then(() => loadCardRatings())
+    }
+  })
+})()  // ← 这里立即执行
+
+// 每秒更新倒计时
+setInterval(updateCountdown, 1000)
+</script>
+</body>
+</html>

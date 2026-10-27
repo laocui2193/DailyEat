@@ -1,0 +1,32 @@
+{
+  "name": "nearbyeats",
+  "version": "1.0.0",
+  "description": "随心吃吃 - 香港大学周边餐厅推荐",
+  "author": "随心吃吃",
+  "main": "main.js",
+  "scripts": {
+    "start": "env -u ELECTRON_RUN_AS_NODE electron .",
+    "server": "C:/Users/asus/anaconda3/python.exe server/app.py",
+    "build": "env -u ELECTRON_RUN_AS_NODE electron-builder --win --dir"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.nearbyeats.app",
+    "productName": "随心吃吃",
+    "icon": "resources/icon.png",
+    "files": [
+      "main.js",
+      "index.html",
+      "restaurants.json",
+      "resources/icon.png"
+    ],
+    "win": {
+      "target": "dir",
+      "signAndEditExecutable": false
+    }
+  }
+}
